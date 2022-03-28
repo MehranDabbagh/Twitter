@@ -1,4 +1,4 @@
-package repository.Impl;
+package repository.impl;
 
 import Connnection.SessionFactorySingleton;
 import org.hibernate.Session;

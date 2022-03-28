@@ -1,9 +1,7 @@
-package repository.Impl;
+package repository.impl;
 
 import entity.Account;
 import repository.AccountRepository;
-
-import java.util.List;
 
 public class AccountRepositoryImpl extends GenericRepositoryImpl<Account,Integer> implements AccountRepository{
 

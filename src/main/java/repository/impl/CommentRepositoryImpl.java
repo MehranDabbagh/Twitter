@@ -1,9 +1,7 @@
-package repository.Impl;
+package repository.impl;
 
 import entity.Comment;
 import repository.CommentRepository;
-
-import java.util.List;
 
 public class CommentRepositoryImpl extends GenericRepositoryImpl<Comment,Integer> implements CommentRepository {
 
