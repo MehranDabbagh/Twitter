@@ -2,8 +2,12 @@ package main;
 
 import CustomExceptions.OutOfRangeInput;
 import entity.Account;
+import entity.Comment;
+import entity.Reply;
 import entity.Twit;
 import service.impl.AccountServiceImpl;
+import service.impl.CommentServiceImpl;
+import service.impl.ReplyServiceImpl;
 import service.impl.TwitServiceImpl;
 
 import java.util.InputMismatchException;
@@ -15,6 +19,8 @@ public class Main {
     static Scanner input = new Scanner(System.in);
     static AccountServiceImpl accountService = new AccountServiceImpl();
     static TwitServiceImpl twitService = new TwitServiceImpl();
+    static CommentServiceImpl commentService = new CommentServiceImpl();
+    static ReplyServiceImpl replyService = new ReplyServiceImpl();
 
     public static void main(String[] args) {
         Boolean flag = true;
@@ -207,7 +213,7 @@ public class Main {
                 Integer twitId = input.nextInt();
                 Twit twit = twitService.findById(twitId);
                 if (twit != null) {
-                    workingOnTwit(twit);
+                    workingOnTwit(account, twit);
                 }
             } catch (InputMismatchException e) {
                 System.out.println("please enter a number!");
@@ -271,10 +277,113 @@ public class Main {
                 .forEach(System.out::println);
     }
 
-    public static void workingOnTwit(Twit twit) {
-
+    public static void workingOnTwit(Account account, Twit twit) {
+        boolean flag = true;
+        while (flag) {
+            System.out.println("1-liking twit" + "\n" +
+                    "2-disliking twit" + "\n" +
+                    "3-adding a comment to twit" + "\n" +
+                    "4-adding a reply to comments" + "\n" +
+                    "5-exit");
+            try {
+                Integer operator = input.nextInt();
+                if (operator > 5 || operator < 1) {
+                    throw new OutOfRangeInput("please enter something in range!");
+                }
+                switch (operator) {
+                    case 1:
+                        twit.setLikes(twit.getLikes() + 1);
+                        twitService.Update(twit);
+                        break;
+                    case 2:
+                        twit.setDisLikes(twit.getDisLikes() + 1);
+                        twitService.Update(twit);
+                        break;
+                    case 3:
+                        System.out.println("enter your comment:");
+                        String comment = input.next();
+                        Comment comment1 = new Comment();
+                        comment1.setContent(comment);
+                        comment1.setAccount(account);
+                        comment1.setTwit(twit);
+                        commentService.create(comment1);
+                        break;
+                    case 4:
+                        twit
+                                .getCommentSet()
+                                .stream()
+                                .forEach(System.out::println);
+                        System.out.println("please enter id of the comment that you want to reply:");
+                        try {
+                            Integer commentId = input.nextInt();
+                            Comment comment2 = commentService.findById(commentId);
+                            if (comment2 != null) {
+                                System.out.println("please enter your reply(280 character maximum):");
+                                String reply = input.next();
+                                if (reply.length() > 0) {
+                                    Reply reply1 = new Reply();
+                                    reply1.setAccount(account);
+                                    reply1.setComment(comment2);
+                                    reply1.setContent(reply);
+                                    replyService.create(reply1);
+                                }
+                            }
+                        } catch (InputMismatchException e) {
+                            System.out.println("please enter a number!");
+                        }
+                        break;
+                    case 5:
+                        flag = true;
+                        break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("please enter a number!");
+            } catch (OutOfRangeInput e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 
     public static void workingOnAccount(Account viewerAccount, Account viewingAccount) {
+        Boolean flag = true;
+        while (flag) {
+            System.out.println("1-follow" + "\n" + "2-unfollow" + "\n" + "3-exit");
+            try {
+                Integer operator = input.nextInt();
+                if (operator > 3 || operator < 1) {
+                    throw new OutOfRangeInput("please enter something in range!");
+                }
+                switch (operator) {
+                    case 1:
+                        if(viewingAccount.getFollower().contains(viewerAccount)){
+                            System.out.println("you already followed this account!");
+                        }else {
+                            viewingAccount.getFollower().add(viewerAccount);
+                            viewerAccount.getFollowing().add(viewingAccount);
+                           accountService.Update(viewingAccount);
+                           accountService.Update(viewerAccount);
+                        }
+                        break;
+                    case 2:
+                        if(!viewingAccount.getFollower().contains(viewerAccount)){
+                            System.out.println("you already unfollowed this account!");
+                        }else {
+                            viewingAccount.getFollower().remove(viewerAccount);
+                            viewerAccount.getFollowing().remove(viewingAccount);
+                            accountService.Update(viewingAccount);
+                            accountService.Update(viewerAccount);
+                        }
+                        break;
+                    case 3:
+                        flag = false;
+                        break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("please enter a number!");
+            } catch (OutOfRangeInput e) {
+                System.out.println(e.getMessage());
+            }
+
+        }
     }
 }
