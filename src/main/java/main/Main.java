@@ -2,14 +2,19 @@ package main;
 
 import CustomExceptions.OutOfRangeInput;
 import entity.Account;
+import entity.Twit;
 import service.impl.AccountServiceImpl;
+import service.impl.TwitServiceImpl;
 
 import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Main {
     static Scanner input = new Scanner(System.in);
     static AccountServiceImpl accountService = new AccountServiceImpl();
+    static TwitServiceImpl twitService = new TwitServiceImpl();
 
     public static void main(String[] args) {
         Boolean flag = true;
@@ -52,6 +57,8 @@ public class Main {
         if (id <= 0) {
             System.out.println("there is no acc with this username and password!");
             return;
+        } else {
+            loggedInAccount(id);
         }
     }
 
@@ -64,11 +71,210 @@ public class Main {
         String username = input.next();
         System.out.println("please enter your password:");
         String password = input.next();
-        Account account=new Account(firstname,lastname,username,password,null,null);
-        if(accountService.create(account)>0){
+        Account account = new Account(firstname, lastname, username, password, null, null, null);
+        if (accountService.create(account) > 0) {
             System.out.println("done!");
             return;
         }
         System.out.println("something went wrong! try again!");
+    }
+
+    public static void loggedInAccount(Integer id) {
+        Account account = accountService.findById(id);
+        System.out.println("welcome " + account.getFirstName() + "!");
+        boolean flag = true;
+        while (flag) {
+            System.out.println("1-making a new twit" + "\n" +
+                    "2-editing your twits" + "\n" +
+                    "3-deleting your twits" + "\n" +
+                    "4-showing all twits" + "\n" +
+                    "5-searching accounts" + "\n" +
+                    "6-editing your profile" + "\n" +
+                    "7-deleting your profile" + "\n" +
+                    "8-showing your followers" + "\n" +
+                    "9-exit");
+            try {
+                Integer operator = input.nextInt();
+                if (operator > 9 || operator < 1) {
+                    throw new OutOfRangeInput("please enter something in range!");
+                }
+                switch (operator) {
+                    case 1:
+                        addingNewTwit(account);
+                        break;
+                    case 2:
+                        editingTwit(account);
+                        break;
+                    case 3:
+                        deletingTwit(account);
+                        break;
+                    case 4:
+                        showingAllTwits(account);
+                        break;
+                    case 5:
+                        searchingAccounts(account);
+                        break;
+                    case 6:
+                        editingProfile(account);
+                        break;
+                    case 7:
+                        deletingProfile(account);
+                        break;
+                    case 8:
+                        showingFollowers(account);
+                        break;
+                    case 9:
+                        flag = false;
+                        break;
+
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("please enter a number!");
+            } catch (OutOfRangeInput e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public static void addingNewTwit(Account account) {
+        System.out.println("please enter the text of your twit(enter means its finished and max 280 character):");
+        String content = input.next();
+        if (content.length() > 280) {
+            System.out.println("two much character! please try again!");
+        } else {
+            Twit twit = new Twit();
+            twit.setAccount(account);
+            twit.setContent(content);
+            twit.setLikes(0);
+            if (twitService.create(twit) > 0) {
+                System.out.println("done!");
+                return;
+            } else {
+                System.out.println("something went wrong!please try again!");
+            }
+        }
+    }
+
+    public static void editingTwit(Account account) {
+        account
+                .getTwits()
+                .stream()
+                .forEach(System.out::println);
+        System.out.println("please enter id of the twit you want to edit:");
+        try {
+            Integer twitId = input.nextInt();
+            System.out.println("please enter a new value for content:");
+            String newContent = input.next();
+            if (newContent.length() > 280) {
+                System.out.println("two much character! please try again!");
+            } else {
+                Twit twit = twitService.findById(twitId);
+                twit.setContent(newContent);
+                twitService.Update(twit);
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("please enter a number!");
+        }
+
+    }
+
+    public static void deletingTwit(Account account) {
+        account
+                .getTwits()
+                .stream()
+                .forEach(System.out::println);
+        System.out.println("please enter id of the twit you want to edit:");
+        try {
+            Integer twitId = input.nextInt();
+            Twit twit = twitService.findById(twitId);
+            if (twit != null) {
+                twitService.Delete(twitId);
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("please enter a number!");
+        }
+    }
+
+    public static void showingAllTwits(Account account) {
+        boolean flag = true;
+        while (flag) {
+            List<Twit> twits = twitService.findAll();
+            twits
+                    .stream()
+                    .forEach(System.out::println);
+            System.out.println("enter twit id for other things(liking,commenting):");
+            try {
+                Integer twitId = input.nextInt();
+                Twit twit = twitService.findById(twitId);
+                if (twit != null) {
+                    workingOnTwit(twit);
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("please enter a number!");
+            }
+        }
+    }
+
+    public static void searchingAccounts(Account account) {
+        System.out.println("please enter username you want to see:");
+        String username = input.next();
+        Account account1 = accountService.findByUsername(username);
+        if (account1 != null) {
+            workingOnAccount(account, account1);
+        }
+    }
+
+    public static void editingProfile(Account account) {
+        System.out.println("1-edit your firstname" + "\n" +
+                "2-edit your lastname" + "\n" +
+                "3-edit your username" + "\n" +
+                "4-edit your password");
+        try {
+            Integer operator = input.nextInt();
+            if (operator > 4 || operator < 1) {
+                throw new OutOfRangeInput("please enter something in range!");
+            }
+            System.out.println("enter new value:");
+            switch (operator) {
+                case 1:
+                    account.setFirstName(input.next());
+                    accountService.Update(account);
+                    break;
+                case 2:
+                    account.setLastName(input.next());
+                    accountService.Update(account);
+                    break;
+                case 3:
+                    account.setUserName(input.next());
+                    accountService.Update(account);
+                    break;
+                case 4:
+                    account.setPassword(input.next());
+                    accountService.Update(account);
+                    break;
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("please enter a number!");
+        } catch (OutOfRangeInput e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void deletingProfile(Account account) {
+        accountService.Delete(account.getId());
+    }
+
+    public static void showingFollowers(Account account) {
+        account
+                .getFollower()
+                .stream()
+                .forEach(System.out::println);
+    }
+
+    public static void workingOnTwit(Twit twit) {
+
+    }
+
+    public static void workingOnAccount(Account viewerAccount, Account viewingAccount) {
     }
 }

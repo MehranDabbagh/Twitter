@@ -12,6 +12,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Account findByUsername(String username) {
+        return null;
+    }
+
+    @Override
     public Integer create(Account account) {
         return null;
     }
