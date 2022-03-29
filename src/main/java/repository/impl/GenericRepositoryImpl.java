@@ -1,11 +1,13 @@
 package repository.impl;
 
 import Connnection.SessionFactorySingleton;
+import lombok.var;
 import org.hibernate.Session;
 
 import org.hibernate.SessionFactory;
 import repository.GenericRepository;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 
 public class GenericRepositoryImpl<T,ID> implements GenericRepository<T,ID> {
@@ -42,9 +44,17 @@ public class GenericRepositoryImpl<T,ID> implements GenericRepository<T,ID> {
     }
 
     @Override
-    public List<T> findAll(ID id) {
+    public List<T> findAll() {
         Session session = sessionFactory.openSession();
         String query = String.format("from %s", tClass.getSimpleName());
         return session.createQuery(query, tClass).list();
+    }
+
+    @Override
+    public T findById(ID id) {
+        Session session = sessionFactory.openSession();
+        var jpql = String.format("DELETE FROM %s t WHERE t.id = :ID", tClass.getSimpleName());
+        return session.createQuery(jpql, tClass).setParameter("ID",id).getSingleResult();
+
     }
 }

@@ -355,19 +355,19 @@ public class Main {
                 }
                 switch (operator) {
                     case 1:
-                        if(viewingAccount.getFollower().contains(viewerAccount)){
+                        if (viewingAccount.getFollower().contains(viewerAccount)) {
                             System.out.println("you already followed this account!");
-                        }else {
+                        } else {
                             viewingAccount.getFollower().add(viewerAccount);
                             viewerAccount.getFollowing().add(viewingAccount);
-                           accountService.Update(viewingAccount);
-                           accountService.Update(viewerAccount);
+                            accountService.Update(viewingAccount);
+                            accountService.Update(viewerAccount);
                         }
                         break;
                     case 2:
-                        if(!viewingAccount.getFollower().contains(viewerAccount)){
+                        if (!viewingAccount.getFollower().contains(viewerAccount)) {
                             System.out.println("you already unfollowed this account!");
-                        }else {
+                        } else {
                             viewingAccount.getFollower().remove(viewerAccount);
                             viewerAccount.getFollowing().remove(viewingAccount);
                             accountService.Update(viewingAccount);
