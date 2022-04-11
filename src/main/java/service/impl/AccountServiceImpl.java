@@ -23,17 +23,12 @@ public class AccountServiceImpl implements AccountService {
 
             try {
                 transaction.begin();
-                List<Account> accounts = accountRepository.findAll();
-                transaction.commit();
-                Account account2=accounts
-                        .stream()
-                        .filter(account1 -> Objects.equals(account1.getUserName(), account.getUserName()))
-                        .filter(account1 -> Objects.equals(account1.getPassword(), account.getPassword()))
-                        .findFirst()
-                        .get();
-                if(account2!=null){
-                    return account2.getId();
-                }
+               Account account1=accountRepository.login(account.getUserName(),account.getPassword());
+               transaction.commit();
+               if(account1!=null){
+                   return account1.getId();
+               }
+
             } catch (Exception e) {
                 transaction.rollback();
                 throw e;

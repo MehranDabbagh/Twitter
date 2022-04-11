@@ -7,7 +7,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import repository.GenericRepository;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 public class GenericRepositoryImpl<T,ID> implements GenericRepository<T,ID> {
@@ -53,8 +52,8 @@ public class GenericRepositoryImpl<T,ID> implements GenericRepository<T,ID> {
     @Override
     public T findById(ID id) {
         Session session = sessionFactory.openSession();
-        var jpql = String.format("DELETE FROM %s t WHERE t.id = :ID", tClass.getSimpleName());
-        return session.createQuery(jpql, tClass).setParameter("ID",id).getSingleResult();
+        var jpql = String.format("FROM %s t  WHERE t.id = :id", tClass.getSimpleName());
+        return session.createQuery(jpql, tClass).setParameter("id",id).getSingleResult();
 
     }
 }

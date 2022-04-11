@@ -19,8 +19,8 @@ public class SessionFactorySingleton {
                     .configure() // goes and fetches configuration from hibernate.cfg.xml
                     .build();
             INSTANCE = new MetadataSources(registry)
-                    .addAnnotatedClass(Comment.class)
                     .addAnnotatedClass(BaseEntity.class)
+                    .addAnnotatedClass(Comment.class)
                     .addAnnotatedClass(Post.class)
                     .addAnnotatedClass(Twit.class)
                     .addAnnotatedClass(Reply.class)
